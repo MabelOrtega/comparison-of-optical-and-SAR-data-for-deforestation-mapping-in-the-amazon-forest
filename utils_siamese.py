@@ -224,14 +224,14 @@ def build_base_encoder(input_shape):
         
     input_layer = Input(shape=input_shape, name="input_enc_net")
     
-    res_block1 = resnet_block(input_layer, nb_filters[0], 1)
-    pool1 = MaxPool2D((2 , 2), name='pool_net1')(res_block1)
+    conv1 = Conv2D(nb_filters[0], (3, 3), activation='relu', padding="same", name = 'conv1_net')(input_layer)
+    pool1 = MaxPool2D((2 , 2), name='pool_net1')(conv1)
     
-    res_block2 = resnet_block(pool1, nb_filters[1], 2)
-    pool2 = MaxPool2D((2 , 2), name='pool_net2')(res_block2)
+    conv2 = Conv2D(nb_filters[1], (3, 3), activation='relu', padding="same", name = 'conv2_net')(pool1)
+    pool2 = MaxPool2D((2 , 2), name='pool_net2')(conv2)
     
-    res_block3 = resnet_block(pool2, nb_filters[2], 3)
-    pool3 = MaxPool2D((2 , 2), name='pool_net3')(res_block3)
+    conv3 = Conv2D(nb_filters[2], (3, 3), activation='relu', padding="same", name = 'conv3_net')(pool2)
+    pool3 = MaxPool2D((2 , 2), name='pool_net3')(conv3)
     
     res_block4 = resnet_block(pool3, nb_filters[2], 4)
     
@@ -239,7 +239,7 @@ def build_base_encoder(input_shape):
     
     res_block6 = resnet_block(res_block5, nb_filters[2], 6)
            
-    return Model(inputs = input_layer, outputs = [res_block1, res_block2, res_block3, res_block6])
+    return Model(inputs = input_layer, outputs = [conv1, conv2, conv3, res_block6])
 
 def build_base_decoder(input_shape): 
     nb_filters = [1, 32, 64, 128]
