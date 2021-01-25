@@ -212,10 +212,13 @@ def resnet_block(x, n_filter, ind):
     x = Conv2D(n_filter, (3, 3), activation='relu', padding="same", name = 'res1_net'+str(ind))(x)
     x = Dropout(0.5, name = 'drop_net'+str(ind))(x)
     ## Conv 2
-    x  = Conv2D(n_filter, (3, 3), activation='relu', padding="same", name = 'res2_net'+str(ind))(x)
+    x = Conv2D(n_filter, (3, 3), activation='relu', padding="same", name = 'res2_net'+str(ind))(x)
+    
+    ## Shortcut
+    s  = Conv2D(n_filter, (1, 3), activation='relu', padding="same", name = 'res3_net'+str(ind))(x_init)
     
     ## Add
-    x = Add()([x, x_init])
+    x = Add()([x, s])
     return x
 
 def build_base_encoder(input_shape):
