@@ -243,7 +243,7 @@ def weighted_categorical_crossentropy(weights):
 
 # U-Net model
 def build_unet(input_shape, nb_filters, n_classes):
-    input_img = Input(input_shape)
+    input_layer = Input(input_shape)
  
     conv1 = Conv2D(nb_filters[0], (3 , 3) , activation='relu' , padding='same', name = 'conv1')(input_img) 
     pool1 = MaxPool2D((2 , 2))(conv1)
@@ -271,7 +271,7 @@ def build_unet(input_shape, nb_filters, n_classes):
         
     output = Conv2D(n_classes,(1,1), activation = 'softmax')(merged1)
     
-    return Model(input_img , output)
+    return Model(input_layer , output)
 
 # Residual block 
 def resnet_block(x, n_filter, ind):
@@ -279,25 +279,29 @@ def resnet_block(x, n_filter, ind):
     ## Conv 1
     x =  Conv2D(n_filter, (3, 3), activation='relu', padding="same", name = 'res1_net'+str(ind))(x)
     x = Dropout(0.5, name = 'drop_net'+str(ind))(x)
+    
+    ## Conv 2
+    x =  Conv2D(n_filter, (3, 3), activation='relu', padding="same", name = 'res2_net'+str(ind))(x)
+    
     ## Shortcut
-    x  = Conv2D(n_filter, (3, 3), activation='relu', padding="same", name = 'res2_net'+str(ind))(x)
+    s  = Conv2D(n_filter, (3, 3), activation='relu', padding="same", name = 'res3_net'+str(ind))(x_init)
     ## Add
-    x = Add()([x, x_init])
+    x = Add()([x, s])
     return x
 
 # Residual U-Net model
 def build_resunet(input_shape, nb_filters, n_classes):
     '''Base network to be shared (eq. to feature extraction)'''
-    input_img = Input(shape = input_shape, name="input_enc_net")
+    input_layer= Input(shape = input_shape, name="input_enc_net")
     
-    conv1 = Conv2D(nb_filters[0], (3 , 3) , activation='relu' , padding='same', name = 'conv1')(input_img) 
-    pool1 = MaxPool2D((2 , 2), name='pool_net1')(conv1)
+    res_block1 = resnet_block(input_layer, nb_filters[0], 1)
+    pool1 = MaxPool2D((2 , 2), name='pool_net1')(res_block1)
     
-    conv2 = Conv2D(nb_filters[1], (3 , 3) , activation='relu' , padding='same', name = 'conv1')(pool1) 
-    pool2 = MaxPool2D((2 , 2), name='pool_net2')(conv2)
+    res_block2 = resnet_block(pool1, nb_filters[1], 2) 
+    pool2 = MaxPool2D((2 , 2), name='pool_net2')(res_block2)
     
-    conv3 = Conv2D(nb_filters[2], (3 , 3) , activation='relu' , padding='same', name = 'conv1')(pool2) 
-    pool3 = MaxPool2D((2 , 2), name='pool_net3')(conv3)
+    res_block3 = resnet_block(pool2, nb_filters[2], 3) 
+    pool3 = MaxPool2D((2 , 2), name='pool_net3')(res_block3)
     
     res_block4 = resnet_block(pool3, nb_filters[2], 4)
     
@@ -321,5 +325,5 @@ def build_resunet(input_shape, nb_filters, n_classes):
 
     output = Conv2D(n_classes,(1,1), activation = 'softmax', padding = 'same', name = 'output')(merged1)
                                                                                                            
-    return Model(input_img, output)
+    return Model(input_layer, output)
     
