@@ -1,0 +1,27 @@
+#INITIAL SETTINGS
+data_directory: 'your_directory'
+image_type: 'Sentinel2A'              # Select images Landsat-8, Sentinel-2, Sentinel-1:  'L8', 'S2', 'S1'
+network: 'unet'                       # Select network architecture: 'unet', 'resunet', 'siamese'
+
+folder_exp: 'results_segmentation'
+num_exp: 1
+times: 5
+
+# DEFINITION OF TRAINING, VALIDATION AND TESTING TILES
+tiles_tr: [1,3,5,8,11,13,14,20]
+tiles_vl: [6,19]
+tiles_ts: [2,4,7,9,10,12,15,16,17,18]
+
+# SETTINGS FOR TRAINING PATCHES
+overlap: 0.7
+buffer: 2
+patch_size: 128
+def_perdentage: 2
+num_classes: 3
+type_norm: 1                    # Select normalization type: '1': StandardScaler, '2': feature_range=(0, 1), '3': feature_range=(1, -1)
+
+# TRAINING PARAMETERS
+batch_size: 32
+lr: 1e-3
+beta_1: 0.9
+save_prob: False
